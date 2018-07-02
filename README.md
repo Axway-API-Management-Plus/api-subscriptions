@@ -1,77 +1,48 @@
 # Description
-This project provides:
-- A converter to generate a Swagger 2.0 definition based on a OData-Meta-Definition
-- A policy which makes it possible to route OData specific queries through the API-Manager. 
-
-The converter takes in an OData URL (such as http://services.odata.org/V4/TripPinServiceRW) and the name of the output file to convert the odata specfication to a Swagger 2.0 API-Specification, which can imported into the Axway API-Manager.
-## OData V4 Usage:
-```bash
-D:\odata-routing-policy\converter\odata4\bin\Release>OData2Swagger.exe http://services.odata.org/V4/TripPinServiceRW name_of_swagger_file.json [http-basic-username] [http-basic-password]
-
+Use this policy to get a list of applications that are subscribed to your APIs. You get back a JSON-Output with an Array of APIs and inside each an Array with the subscribed aps.
+```json
+[
+    {
+        "ce28906f-bff3-4684-a8aa-dfcbb357295e": [
+            {
+                "id": "7c7c26f9-ddd2-4af0-b85e-4409a5b9795e",
+                "name": "FHIR - Everything Health",
+                "description": "An application that promotes healthy living.",
+                "organizationId": "53437f82-8db5-4f61-9f9b-0b34db8be847",
+                "phone": null,
+                "email": null,
+                "createdBy": "f7289d70-c71b-4c6b-a2bb-9461f93b91aa",
+                "managedBy": [],
+                "createdOn": 1490382897657,
+                "enabled": true,
+                "image": "/api/portal/v1.3/applications/7c7c26f9-ddd2-4af0-b85e-4409a5b9795e/image",
+                "state": "approved"
+            },
+            {
+                "id": "1a6e666d-2ef2-49c2-97cc-79f7dc8a565d",
+                "name": "Plexus Suite – Patient Monitoring",
+                ....
+                ...
 ```
-
-## OData V3 and Below Usage:
-```bash
-D:\odata-routing-policy\converter\odata3\bin\Release>OdataSwaggerConverter.exe http://services.odata.org/V3/Northwind/Northwind.svc/$metadata name_of_swagger_file.json [http-basic-username] [http-basic-password]
-
-```
-
-The converter generates a Swagger-File using the given name in the current folder.
-Please note, that providing username/password is optional.
-
-
-Once imported and virtualized as a Frontend-API you need make the Policy provided in this project a routing policy, as it takes care about proper routing all different OData-Requests.
-
-To 
 
 ## API Management Version Compatibilty
 This artefact was successfully tested for the following versions:
 - V7.5.3
 
-
 ## Install
-
-```
-• Use the Converter to generate a Swagger 2.0 API-Sepcification
-• Import the Policy: "OData routing" into you API-Manager configuration group
-• Make this policy part of your API-Manager routing policy (e.g. as a Policy-Shortcut)
-```
-![Routing Policy](https://github.com/Axway-API-Management-Plus/odata-routing-policy/blob/master/images/OData-Policy-Linked-to-Routing.png)
-```
-• Configure your routing policy in API-Manager for your OData-Frontend API
-• Important note: When not using the provided Routing-Policy from this project: 
-     Verify, in the "Connect to URL" filter that the URL-Parameter is configured to ${destinationURL}
-```
+- Import the Policy-Configuration Fragment (api-subscriptions.xml) into your Policy-Studio configuration
+- link this policy to a Path on a Listener you want (Example: https://apihost.com:8080/get-api-subscriptions)
+- Setup the hostname of your API-Manager in the following Connect to URL filters:
+  - Policy: "Generate API-List": "Get List of Applications" & "List of APIs from API-Mgt"
+  - Policy: "Get All Subscriptions": "List App-Subscriptions"
+- Setup the Client-Credential profile: "API-Manager" with a valid username and password
 
 ## Usage
-
-```
-• To enable this specific routing for your APIs, make sure you select the configured routing policy
-```
-![API-Manager Routing Policy](https://github.com/Axway-API-Management-Plus/odata-routing-policy/blob/master/images/api-routing-policy-incl-odata.png)
-```
-• Configured API-Methods must end with * (example: ..../Airports* without any slash)
-  (done by the Converter in that way)
- ```
-![API-Manager OData API](https://github.com/Axway-API-Management-Plus/odata-routing-policy/blob/master/images/odata-api-in-apimgr.png)
-```
-• And correct the FE-API Path by removing this part (S(bwlyi5zyfdifrulnwfpj2f4u)): 
-```
-![API-Manager OData FE_API](https://github.com/Axway-API-Management-Plus/odata-routing-policy/blob/master/images/odata-api-in-apimgr-fe-api.png)
+Call the Policy on the configured path. Example: https://apihost.com:8080/get-api-subscriptions
 
 ## Bug and Caveats
 
-When using nested query parameters like in this example:
-```
-/People?$expand=Trips($filter=Name eq 'Trip in US')
-```
-the nested parameter must be URL-Encoded due to the fact, how the API-Manager 
-parses the Query-Parameters based on the equal ("=") sign:
-```
-/People?$expand=Trips(%24filter%3DName%20eq%20%27Trip%20in%20US%27)
-```
-Besides that, the Postman-Test-Suite passes including many differant query variations. 
-If you contribute, make sure the test-suite still runs okay.
+This Policy has is using a Loop to iterate over all registered applications and has been tested only with a limited number of applications (15). Please use it with care, when having more applications.
 
 ## Contributing
 
