@@ -21,8 +21,6 @@ Use this policy to get a list of applications that are subscribed to your APIs. 
             {
                 "id": "1a6e666d-2ef2-49c2-97cc-79f7dc8a565d",
                 "name": "Plexus Suite – Patient Monitoring",
-                ....
-                ...
 ```
 
 ## API Management Version Compatibilty
